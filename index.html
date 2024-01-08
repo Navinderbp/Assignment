@@ -3,12 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Parser</title>
+    <title>Product Display</title>
 </head>
 <body>
     <h1>Product List</h1>
     <div id="productList"></div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const apiUrl = "https://s3.amazonaws.com/open-to-cors/assignment.json";
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const products = data.products;
+                    const productArray = Object.keys(products).map(key => products[key]);
+                    const sortedData = productArray.sort((a, b) => {
+                        // Sort by popularity in descending order
+                        if (b.popularity !== a.popularity) {
+                            return b.popularity - a.popularity;
+                        }
+                        // If popularity is the same, sort by price in descending order
+                        return b.price - a.price;
+                    });
+                    displayProducts(sortedData);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+
+        function displayProducts(products) {
+            const productListDiv = document.getElementById('productList');
+            const table = document.createElement('table');
+            table.border = '1';
+
+            // Create table header
+            const headerRow = table.insertRow(0);
+            const headerCells = ['Title', 'Price', 'Popularity'];
+            headerCells.forEach(cellText => {
+                const cell = headerRow.insertCell();
+                cell.appendChild(document.createTextNode(cellText));
+            });
+
+            // Create table rows
+            products.forEach(product => {
+                const row = table.insertRow();
+                const titleCell = row.insertCell();
+                const priceCell = row.insertCell();
+                const popularityCell = row.insertCell();
+
+                titleCell.textContent = product.title;
+                priceCell.textContent = product.price;
+                popularityCell.textContent = product.popularity;
+            });
+
+            // Append the table to the productListDiv
+            productListDiv.appendChild(table);
+        }
+    </script>
 </body>
 </html>
